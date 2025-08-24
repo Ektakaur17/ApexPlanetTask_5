@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0ea5e9" />
+<title>ShopLite — Capstone E-commerce</title>
+
+<style>
+/* ==== Reset & Variables ==== */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0b1220;--card:#0f172a;--muted:#93a3b8;--text:#e5eefb;--brand:#0ea5e9;--accent:#22c55e;--warn:#f59e0b;--danger:#ef4444;--ring:0 0 0 3px rgba(14,165,233,.35)}
+body{font:500 16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1220 0%,#0a1020 100%);color:var(--text);-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+
+/* ==== Layout ==== */
+.container{max-width:1200px;margin:auto;padding:16px}
+header{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.75);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
+.header-inner{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800}
+.brand .logo{inline-size:36px;block-size:36px;border-radius:12px;background:conic-gradient(from 160deg,#0ea5e9,#22c55e,#a855f7,#0ea5e9);box-shadow:0 4px 18px rgba(14,165,233,.35)}
+
+/* ==== Search ==== */
+.searchbar{flex:1;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:8px 10px;transition:.2s}
+.searchbar:focus-within{box-shadow:var(--ring);border-color:#38bdf8}
+.searchbar input{flex:1;background:transparent;border:none;outline:none;color:var(--text)}
+.searchbar button{border:1px solid rgba(255,255,255,.1);background:#0ea5e9;color:white;padding:8px 12px;border-radius:10px;cursor:pointer}
+
+/* ==== Buttons ==== */
+.header-actions{display:flex;gap:8px}
+.iconbtn{position:relative;background:rgba(255,255,255,.06);color:var(--text);padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.1);cursor:pointer}
+.badge{position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;font-size:11px;padding:4px 6px;border-radius:999px}
+
+/* ==== Main Grid ==== */
+main{display:grid;grid-template-columns:260px 1fr;gap:16px;margin-top:16px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+aside{position:sticky;top:74px;align-self:start;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:14px;border-radius:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;transition:transform .15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.card .thumb{aspect-ratio:4/3;background:#0b1328;display:grid;place-items:center}
+.card .thumb img{width:100%;height:100%;object-fit:cover}
+.card .meta{padding:10px 12px 14px}
+.title{font-weight:700;font-size:15px;margin-bottom:4px}
+.price{font-weight:800}
+.small{font-size:12px;color:var(--muted)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.btn{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.08);color:var(--text);cursor:pointer;border:1px solid rgba(255,255,255,.1)}
+.btn.primary{background:var(--brand);color:#fff}
+.chip{font-size:11px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);padding:6px 8px;border-radius:10px}
+
+/* ==== Drawer ==== */
+.drawer{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:none}
+.drawer.open{display:block}
+.sheet{position:absolute;right:0;top:0;bottom:0;width:min(420px,100%);background:#0b1120;padding:14px;overflow:auto;border-left:1px solid rgba(255,255,255,.1)}
+.cart-item{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px}
+.cart-item img{width:64px;height:48px;object-fit:cover;border-radius:8px}
+.qty button{inline-size:28px;block-size:28px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff}
+</style>
+</head>
+<body>
+<header>
+  <div class="container header-inner">
+    <div class="brand"><div class="logo"></div><span>ShopLite</span></div>
+    <form class="searchbar" id="searchForm"><input id="searchInput" type="search" placeholder="Search products…" /><button>Search</button></form>
+    <div class="header-actions">
+      <button class="iconbtn" id="wishlistBtn">♥<span class="badge" id="wishCount">0</span></button>
+      <button class="iconbtn" id="cartBtn">🛒<span class="badge" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <main>
+    <aside>
+      <h3>Sort</h3>
+      <select id="sortSelect"><option value="featured">Featured</option><option value="price-asc">Price: Low → High</option><option value="price-desc">Price: High → Low</option></select>
+      <h3 style="margin-top:12px">Category</h3>
+      <div id="categoryPills" class="pills"></div>
+    </aside>
+    <section><div class="grid" id="productGrid"></div></section>
+  </main>
+</div>
+
+<!-- Drawer -->
+<div class="drawer" id="drawer"><div class="sheet"><h2 id="drawerTitle">Your Cart</h2><div id="cartList"></div></div></div>
+
+<footer style="text-align:center;margin:20px;color:#93a3b8">Capstone demo • Real images now working</footer>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const fmtINR=n=>"₹"+Number(n).toLocaleString("en-IN");
+
+const CATEGORIES=["Accessories","Audio","Wearables","Home","Office","Gaming"];
+
+// ✅ Real product images
+const PRODUCTS=[
+  {id:"p1",name:"Aurora Headphones Pro",cat:"Audio",price:1999,stock:12,rating:4.7,new:true,img:"https://images.pexels.com/photos/3394658/pexels-photo-3394658.jpeg"},
+  {id:"p2",name:"Nebula Smartwatch 2",cat:"Wearables",price:1499,stock:0,rating:4.4,new:false,img:"https://images.pexels.com/photos/277394/pexels-photo-277394.jpeg"},
+  {id:"p3",name:"Luma Desk Lamp",cat:"Home",price:799,stock:19,rating:4.2,new:false,img:"https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"},
+  {id:"p4",name:"Echo Mini Speaker",cat:"Audio",price:649,stock:33,rating:4.5,new:true,img:"https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg"},
+  {id:"p5",name:"Nimbus Keyboard",cat:"Office",price:1299,stock:7,rating:4.6,new:false,img:"https://images.pexels.com/photos/776092/pexels-photo-776092.jpeg"},
+  {id:"p6",name:"Stratus Mouse",cat:"Office",price:899,stock:15,rating:4.3,new:false,img:"https://images.pexels.com/photos/404280/pexels-photo-404280.jpeg"},
+  {id:"p7",name:"Flux RGB Lightstrip",cat:"Home",price:499,stock:42,rating:4.1,new:false,img:"https://images.pexels.com/photos/776126/pexels-photo-776126.jpeg"},
+  {id:"p8",name:"Drift Gamepad X",cat:"Gaming",price:1599,stock:13,rating:4.8,new:true,img:"https://images.pexels.com/photos/1174746/pexels-photo-1174746.jpeg"},
+  {id:"p9",name:"Orbit VR Stand",cat:"Gaming",price:999,stock:3,rating:4.0,new:false,img:"https://images.pexels.com/photos/816476/pexels-photo-816476.jpeg"},
+  {id:"p10",name:"Zen Wireless Charger",cat:"Accessories",price:599,stock:24,rating:4.2,new:false,img:"https://images.pexels.com/photos/404280/pexels-photo-404280.jpeg"},
+  {id:"p11",name:"Pulse Fitness Band",cat:"Wearables",price:749,stock:28,rating:4.1,new:false,img:"https://images.pexels.com/photos/267394/pexels-photo-267394.jpeg"},
+  {id:"p12",name:"Aero Earbuds Lite",cat:"Audio",price:899,stock:0,rating:4.0,new:false,img:"https://images.pexels.com/photos/3394658/pexels-photo-3394658.jpeg"}
+];
+
+let STATE={q:"",sort:"featured",cat:null,cart:{},wishlist:{}};
+
+function applyFilters(list){
+  let out=[...list];
+  if(STATE.cat) out=out.filter(p=>p.cat===STATE.cat);
+  switch(STATE.sort){
+    case"price-asc":out.sort((a,b)=>a.price-b.price);break;
+    case"price-desc":out.sort((a,b)=>b.price-a.price);break;
+    default: out.sort((a,b)=>b.rating-a.rating);
+  }
+  return out;
+}
+
+function cardHTML(p){
+  return `<article class="card">
+    <div class="thumb"><img src="${p.img}" alt="${p.name}" loading="lazy"/></div>
+    <div class="meta">
+      <div class="title">${p.name}</div>
+      <div class="small">${p.cat} • ★ ${p.rating.toFixed(1)}</div>
+      <div class="row"><div class="price">${fmtINR(p.price)}</div></div>
+    </div>
+  </article>`;
+}
+
+function render(){
+  $("#productGrid").innerHTML=applyFilters(PRODUCTS).map(cardHTML).join("");
+}
+render();
+</script>
+</body>
+</html>
